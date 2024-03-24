@@ -2,6 +2,7 @@ import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QFileDialog, QMessageBox, QCheckBox
 from pytube import YouTube
 from moviepy.editor import *
+import os
 
 class Sampler(QMainWindow):
     def __init__(self):
@@ -18,7 +19,6 @@ class Sampler(QMainWindow):
         self.location_input.setReadOnly(True)
 
         self.convert_checkbox = QCheckBox("Convert to MP3")
-        self.convert_checkbox.clicked.connect(self.convert_to_mp3)
 
         self.download_button = QPushButton("Download")
         self.download_button.clicked.connect(self.download_video)
@@ -55,7 +55,10 @@ class Sampler(QMainWindow):
                     self.choose_location()  # If download location is not set, prompt the user to choose a location
 
                 if self.download_location:
-                    video.download(output_path=self.download_location)  # Download the video to the selected location
+                    video_path = video.download(output_path=self.download_location)  # Download the video to the selected location
+                    if self.convert_checkbox.isChecked():
+                        self.convert_to_mp3(video_path)  # Convert the downloaded video to MP3
+                        os.remove(video_path)  # Remove the MP4 version
                 else:
                     self.show_message("Error", "Download location not set.")
                     return
@@ -67,16 +70,11 @@ class Sampler(QMainWindow):
         else:
             self.show_message("Error", "No stream found for the provided URL.")
 
-    def convert_to_mp3(self):
-        if self.convert_checkbox.isChecked():
-            video_file = QFileDialog.getOpenFileName(self, "Choose Video File", filter="Video Files (*.mp4 *.avi *.mkv)")[0]
-            if video_file:
-                video = VideoFileClip(video_file)  # Load the video file
-                mp3_file = video_file.replace(".mp4", ".mp3")  # Replace the file extension
-                video.audio.write_audiofile(mp3_file)  # Write the audio to a new file
-                print("Video converted to MP3 successfully!")
-            else:
-                self.convert_checkbox.setChecked(False)
+    def convert_to_mp3(self, video_path):
+        video = VideoFileClip(video_path)  # Load the video file
+        mp3_file = video_path.replace(".mp4", ".mp3")  # Replace the file extension
+        video.audio.write_audiofile(mp3_file)  # Write the audio to a new file
+        video.close()  # Close the video file
 
     def show_message(self, title, message):
         msg_box = QMessageBox()
