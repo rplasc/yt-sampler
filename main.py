@@ -74,6 +74,9 @@ class Sampler(QMainWindow):
 
                     if self.download_location:
                         video_path = video.download(output_path=self.download_location)  # Download the video to the selected location
+                        while os.path.getsize(video_path) < video.filesize:
+                            pass
+                        
                         if self.convert_checkbox.isChecked():
                             self.convert_to_mp3(video_path)  # Convert the downloaded video to MP3
                             os.remove(video_path)  # Remove the MP4 version
