@@ -64,9 +64,13 @@ def download_stream(main_window):
     try:
         if audio_only:
             # Download only audio stream
-            audio_stream.download(filename=f"{main_window.video_title}.wav", output_path=main_window.download_location)
-        
-            main_window.show_message("Download Successful", "Audio downloaded as WAV.")
+            if main_window.mp3_checkbox.isChecked():
+                audio_stream.download(filename=f"{main_window.video_title}.mp3", output_path=main_window.download_location)
+                main_window.show_message("Download Successful", "Audio downloaded as mp3.")
+            else:
+                audio_stream.download(filename=f"{main_window.video_title}.wav", output_path=main_window.download_location)
+                main_window.show_message("Download Successful", "Audio downloaded as WAV.")
+
         else:
             # Download video stream
             video_stream.download(output_path=main_window.download_location, filename=f"{main_window.video_title}_video")

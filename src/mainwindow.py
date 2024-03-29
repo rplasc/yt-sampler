@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
         self.audio_only_checkbox.setEnabled(True)
         
     def toggle_mp3_checkbox(self, state):
-        if state == Qt.CheckState.Checked:
+        if state == 2:
             self.mp3_checkbox.setEnabled(True)
         else:
             self.mp3_checkbox.setEnabled(False)
