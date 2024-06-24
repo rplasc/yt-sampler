@@ -63,14 +63,36 @@ def download_stream(main_window):
     # Download the selected streams
     try:
         if audio_only:
-            # Download only audio stream
+            # Determine the file extension and filename
             if main_window.mp3_checkbox.isChecked():
-                audio_stream.download(filename=f"{main_window.video_title}.mp3", output_path=main_window.download_location)
-                main_window.show_message("Download Successful", "Audio downloaded as mp3.")
+                file_extension = 'mp3'
             else:
-                audio_stream.download(filename=f"{main_window.video_title}.wav", output_path=main_window.download_location)
-                main_window.show_message("Download Successful", "Audio downloaded as WAV.")
-
+                file_extension = 'wav'
+                
+            # Set file paths
+            download_path = os.path.join(main_window.download_location, f"{main_window.video_title}.webm")
+            output_path = os.path.join(main_window.download_location, f"{main_window.video_title}.{file_extension}")
+            
+            # Download the audio stream
+            audio_stream.download(filename=download_path)
+            main_window.show_message("Download Successful", f"Audio downloaded as {file_extension.upper()}.")
+            
+            # Convert the downloaded file to the desired format using ffmpeg
+            if file_extension == 'mp3':
+                ffmpeg_command = [
+                    'ffmpeg', '-i', download_path, '-codec:a', 'libmp3lame', output_path
+                ]
+            else:  # file_extension == 'wav'
+                ffmpeg_command = [
+                    'ffmpeg', '-i', download_path, output_path
+                ]
+            
+            subprocess.run(ffmpeg_command, check=True)
+            main_window.show_message("Conversion Successful", f"Audio converted to {file_extension.upper()}.")
+            
+            # Remove the original downloaded file
+            os.remove(download_path)
+        
         else:
             # Download video stream
             video_stream.download(output_path=main_window.download_location, filename=f"{main_window.video_title}_video")
